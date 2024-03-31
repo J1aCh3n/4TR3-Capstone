@@ -1,7 +1,6 @@
 import logging
 from typing import Any, List
 
-from deprecate import void
 from pytorch_lightning.loops.dataloader import EvaluationLoop as LegacyEvaluationLoop
 from pytorch_lightning.trainer.connectors.logger_connector.result import _OUT_DICT
 
@@ -9,7 +8,6 @@ from pytorch_lightning.trainer.connectors.logger_connector.result import _OUT_DI
 class EvaluationLoop(LegacyEvaluationLoop):
 
     def advance(self, *args: Any, **kwargs: Any) -> None:
-        void(*args, **kwargs)
 
         dataloader_idx: int = self.current_dataloader_idx
         dataloader = self.trainer.training_type_plugin.process_dataloader(self.current_dataloader)
