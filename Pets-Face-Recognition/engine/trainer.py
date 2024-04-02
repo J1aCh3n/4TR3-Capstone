@@ -370,7 +370,7 @@ class Trainer(pl.Trainer):
         Trainer._log_api_event("init")
         self.state = TrainerState()
 
-        gpu_ids, tpu_cores = self._parse_devices(gpus, auto_select_gpus, tpu_cores)
+        #gpu_ids, tpu_cores = self._parse_devices(gpus, auto_select_gpus, tpu_cores)
 
         # init connectors
         self._data_connector = DataConnector(self, multiple_trainloader_mode)
@@ -383,12 +383,13 @@ class Trainer(pl.Trainer):
             accelerator,
             strategy,
             gpus,
-            gpu_ids,
+            #gpu_ids,
             num_nodes,
             sync_batchnorm,
             benchmark,
             replace_sampler_ddp,
             deterministic,
+            auto_select_gpus,
             precision,
             amp_backend,
             amp_level,

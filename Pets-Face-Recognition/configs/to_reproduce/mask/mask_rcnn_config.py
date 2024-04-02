@@ -10,6 +10,7 @@ from torchvision.datasets.vision import StandardTransform
 
 from data_loading import OxfordIIITPet, OxfordSubset
 from utils.collate_fn import detection_collate_list_fn
+from utils.preprocs import aug_combo
 
 seed = 123
 pytorch_lightning.seed_everything(seed)
@@ -37,7 +38,7 @@ val_augmentation = torchvision.transforms.Compose([
 val_augmentation = StandardTransform(val_augmentation, None)
 
 dataset = OxfordIIITPet(
-    root=str(Path('/home/jiachen/Documents/pets_datasets').resolve()),
+    root=str(Path('../pets_datasets').resolve()),
     target_types=['body_bbox', 'segmentation'],
 )
 
@@ -50,7 +51,7 @@ train_indices = [i for i in animals if i not in val_indices]
 weights = [dataset.big_classes[i] for i in train_indices]
 weights = [(len(weights) - sum(weights)) if i == 1 else sum(weights) for i in weights]
 sampler = WeightedRandomSampler(weights, 2000)
-train = OxfordSubset(dataset, train_indices, train_augmentation, rotate90=True)
+train = OxfordSubset(dataset, train_indices, train_augmentation, )
 val = OxfordSubset(dataset, val_indices, val_augmentation, )
 
 p1 = None
@@ -65,7 +66,7 @@ def model():
         # "rpn_pre_nms_top_n_test": 20,
         #     "rpn_post_nms_top_n_test": 20,
         #     "rpn_score_thresh": 0.05,
-        'box_detections_per_img': 3
+        'box_detections_per_img': 1
     }
 
     model_ = torchvision.models.detection.maskrcnn_resnet50_fpn(
@@ -127,12 +128,7 @@ def val_dataloader():
 
 
 def test_dataloader():
-    return [
-        DataLoader(val, test_batch_size, collate_fn=collate_fn, num_workers=4),
-        DataLoader(OxfordSubset(dataset, train_indices, val_augmentation, ), test_batch_size,
-                   collate_fn=collate_fn,
-                   num_workers=4)
-    ]
+    return val_dataloader()
 
 
 trainer_kwargs = dict(
@@ -146,7 +142,7 @@ mlflow_target_uri = Path('mlruns')
 mlflow_target_uri.mkdir(exist_ok=True)
 mlflow_target_uri = str(mlflow_target_uri)
 experiment_name = 'Body Detection'
-run_name = 'MASK R-CNN + rotate90 + 3 NMS'
+run_name = 'MASK R-CNN'
 
 # devices
 device = 'cuda:0'
